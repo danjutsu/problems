@@ -1,0 +1,56 @@
+///reading it, i knew I'd need to create a CTE "A WITH" but I like to define what needs to wrapped in the with before bundling it.
+///so the first draft goes: 
+SELECT 
+campaign_id AS Campaign_ID, 
+campaign_name AS Campaign_Name,
+ROUND((revenue_generated - investment) / investment * 100) AS ROI
+FROM marketing_spend
+ORDER by ROI DESC
+
+///then looked again and saw i needed to change
+ORDER by ROI, Campaign_ID DESC
+
+///I have my main output. now I need to filter it to the top 25%. there's a few ways to do this. I wanted to use the WITH so i do it manually. I think I need to RANK the the output, but I'm already using order by, so I will assign the output to ROW_NUMBERs. I wrap the data in a WITH and add row numbers
+WITH datapoints AS (
+  SELECT 
+  campaign_id AS Campaign_ID, 
+  campaign_name AS Campaign_Name,
+  ROUND((revenue_generated - investment) / investment * 100) AS ROI, 
+  ROW_NUMBER() OVER (ORDER by (revenue_generated - investment) / investment) AS RowNumber 
+  )      
+-- my way is TRY TEST TRANSFORM. so i remove the WITH and run my code to see the output. my rows count up 1, 2, 3... but I need the TOP 25% so 
+WITH datapoints AS (
+  SELECT 
+  campaign_id AS Campaign_ID, 
+  campaign_name AS Campaign_Name,
+  ROUND((revenue_generated - investment) / investment * 100) AS ROI, 
+  ROW_NUMBER() OVER (ORDER by (revenue_generated - investment) / investment) DESC, campaign_id DESC AS RowNumber 
+  COUNT(*) OVER () AS TotalCampaigns
+  FROM marketing_spend  
+  )
+  SELECT
+Campaign_ID,
+Campaign_Name,
+ROI
+FROM datapoints
+WHERE RowNumber <= COUNT(Campaign_ID * 0.25)
+
+/// it throws an error WITH datapoints AS (SELECT campaign_id AS Campaign_ID, campaign_name AS Campaign_Name, ROUND((revenue_generated - investment) / investment * 100) AS ROI, ROW_NUMBER() OVER ROI AS RowNumber, COUNT(*) OVER () AS TotalCampaigns FROM "marketing_spend") SELECT Campaign_ID, Campaign_Name, ROI FROM datapoints WHERE RowNumber <= COUNT(TotalCampaigns * 0.25) ORDER BY ROI DESC, Campaign_ID DESC - window "roi" does not exist///
+/// had to research but I see. Can't use COUNT in the WHERE and I forgot the ) after DESC
+
+///final solution:
+WITH datapoints AS (
+  SELECT 
+  campaign_id AS Campaign_ID, 
+  campaign_name AS Campaign_Name,
+  ROUND((revenue_generated - investment) / investment * 100) AS ROI, 
+  ROW_NUMBER() OVER (ORDER BY ROUND((revenue_generated - investment) / investment * 100) DESC, campaign_id DESC) AS RowNumber,
+  COUNT(*) OVER () AS TotalCampaigns
+  FROM marketing_spend
+  )
+  SELECT
+Campaign_ID,
+Campaign_Name,
+ROI
+FROM datapoints
+WHERE RowNumber <= TotalCampaigns * 0.25
