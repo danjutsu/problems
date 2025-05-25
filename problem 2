@@ -1,0 +1,37 @@
+TMI (Too Much Information)
+
+
+
+moderate
+
+
+
+25
+
+Often when you're working with customer information you'll want to sell that data to a third party. Sometimes it is illegal to give away sensitive information such as a full name.
+
+Here you are given a table that contains a customer ID and their full name.
+
+Return the customer ID with only the first name of each customer.
+
+
+
+Column Order
+
+
+
+Hints
+
+Expected Output
+
+
+
+Ask AI
+
+customers
+
+
+
+Preview
+
+FieldData Typecustomer_idintfull_nametext] data [customer_idfull_name1001John McGary1002Sally Sue1003Jenny McBlue1004Craig Johnson1005Henry Hue1006Alex Freebird]
