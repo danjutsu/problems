@@ -1,0 +1,4 @@
+///the task is straight forward. my first thought is to use strpos to separate the names but ai suggests nesting strpos in the command to pull out the first name. I write this.
+SELECT customer_id, 
+  LEFT(full_name, STRPOS(full_name, ' ') - 1) AS first_name
+FROM customers
